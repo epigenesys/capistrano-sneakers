@@ -65,28 +65,7 @@ namespace :sneakers do
     if fetch(:sneakers_run_config) == true
       execute :kill, "-SIGTERM `cat #{pid_file}`"
     else
-      if fetch(:stop_sneakers_in_background, fetch(:sneakers_run_in_background))
-        if fetch(:sneakers_use_signals)
-          background :kill, "-TERM `cat #{pid_file}`"
-        else
-          background :bundle, :exec, :sneakersctl, 'stop', "#{pid_file}", fetch(:sneakers_timeout)
-        end
-      else
-        execute :bundle, :exec, :sneakersctl, 'stop', "#{pid_file}", fetch(:sneakers_timeout)
-      end
-    end
-  end
-
-  def quiet_sneakers(pid_file)
-    if fetch(:sneakers_use_signals) || fetch(:sneakers_run_config)
-      background :kill, "-USR1 `cat #{pid_file}`"
-    else
-      begin
-        execute :bundle, :exec, :sneakersctl, 'quiet', "#{pid_file}"
-      rescue SSHKit::Command::Failed
-        # If gems are not installed eq(first deploy) and sneakers_default_hooks as active
-        warn 'sneakersctl not found (ignore if this is the first deploy)'
-      end
+      background :kill, "-TERM `cat #{pid_file}`"
     end
   end
 
@@ -149,25 +128,9 @@ namespace :sneakers do
   end
 
   task :add_default_hooks do
-    after 'deploy:starting', 'sneakers:quiet'
     after 'deploy:updated', 'sneakers:stop'
     after 'deploy:reverted', 'sneakers:stop'
     after 'deploy:published', 'sneakers:start'
-  end
-
-  desc 'Quiet sneakers (stop processing new tasks)'
-  task :quiet do
-    on roles fetch(:sneakers_role) do |role|
-      as_sneakers_user(role) do
-        if test("[ -d #{current_path} ]") # fixes #11
-          for_each_sneakers_process(true) do |pid_file, idx|
-            if sneakers_pid_process_exists?(pid_file)
-              quiet_sneakers(pid_file)
-            end
-          end
-        end
-      end
-    end
   end
 
   desc 'Stop sneakers'
