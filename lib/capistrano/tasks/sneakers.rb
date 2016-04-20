@@ -65,7 +65,7 @@ namespace :sneakers do
     if fetch(:sneakers_run_config) == true
       execute :kill, "-SIGTERM `cat #{pid_file}`"
     else
-      background :kill, "-TERM `cat #{pid_file}`"
+      execute :kill, "-TERM `cat #{pid_file}`"
     end
   end
 
@@ -102,11 +102,7 @@ namespace :sneakers do
       end
 
       with rails_env: fetch(:sneakers_env) do
-        if fetch(:start_sneakers_in_background, fetch(:sneakers_run_in_background))
-          background :bundle, :exec, :sneakers, args.compact.join(' ')
-        else
-          execute :bundle, :exec, :sneakers, args.compact.join(' ')
-        end
+        execute :bundle, :exec, :sneakers, args.compact.join(' ')
       end
     end
   end
