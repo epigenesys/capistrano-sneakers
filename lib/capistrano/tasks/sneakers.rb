@@ -61,6 +61,10 @@ namespace :sneakers do
     test(*("[ -f #{pid_file} ]").split(' '))
   end
 
+  def quiet_sneakers(pid_file)
+    execute :kill, "-USR1 `cat #{pid_file}`"
+  end
+
   def stop_sneakers(pid_file)
     if fetch(:sneakers_run_config) == true
       execute :kill, "-SIGTERM `cat #{pid_file}`"
@@ -124,9 +128,25 @@ namespace :sneakers do
   end
 
   task :add_default_hooks do
+    after 'deploy:starting', 'sneakers:quiet'
     after 'deploy:updated', 'sneakers:stop'
     after 'deploy:reverted', 'sneakers:stop'
     after 'deploy:published', 'sneakers:start'
+  end
+
+  desc 'Quiet sneakers (stop processing new tasks)'
+  task :quiet do
+    on roles fetch(:sneakers_role) do |role|
+      as_sneakers_user(role) do
+        if test("[ -d #{release_path} ]")
+          for_each_sneakers_process(true) do |pid_file, idx|
+            if sneakers_pid_process_exists?(pid_file)
+              quiet_sneakers(pid_file)
+            end
+          end
+        end
+      end
+    end
   end
 
   desc 'Stop sneakers'
