@@ -133,7 +133,7 @@ namespace :sneakers do
   task :stop do
     on roles fetch(:sneakers_role) do |role|
       as_sneakers_user(role) do
-        if test("[ -d #{current_path} ]")
+        if test("[ -d #{release_path} ]")
           for_each_sneakers_process(true) do |pid_file, idx|
             if sneakers_pid_process_exists?(pid_file)
               stop_sneakers(pid_file)
