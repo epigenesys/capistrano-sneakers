@@ -169,6 +169,9 @@ namespace :sneakers do
     on roles fetch(:sneakers_role) do |role|
       as_sneakers_user(role) do
         for_each_sneakers_process do |pid_file, idx|
+          if fetch(:sneakers_force_stop) && sneakers_pid_process_exists?(pid_file)
+            execute :kill, "-SIGKILL `cat #{pid_file}`"
+          end
           start_sneakers(pid_file, idx) unless sneakers_pid_process_exists?(pid_file)
         end
       end
