@@ -170,7 +170,7 @@ namespace :sneakers do
       as_sneakers_user(role) do
         for_each_sneakers_process do |pid_file, idx|
           if fetch(:sneakers_force_stop) && sneakers_pid_process_exists?(pid_file)
-            execute :kill, "-SIGKILL `cat #{pid_file}`"
+            execute :kill, "-SIGKILL `cat #{pid_file}`", raise_on_non_zero_exit: false
           end
           start_sneakers(pid_file, idx) unless sneakers_pid_process_exists?(pid_file)
         end
