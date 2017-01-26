@@ -23,10 +23,6 @@ namespace :deploy do
   before :starting, :check_sneakers_hooks do
     invoke 'sneakers:add_default_hooks' if fetch(:sneakers_default_hooks)
   end
-
-  after :publishing, :restart_sneakers do
-    invoke 'sneakers:restart' if fetch(:sneakers_default_hooks)
-  end
 end
 
 namespace :sneakers do
