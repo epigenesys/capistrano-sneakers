@@ -62,7 +62,7 @@ namespace :sneakers do
   end
 
   def stop_sneakers(pid_file)
-    execute :kill, "-SIGKILL `cat #{pid_file}`"
+    execute :kill, "-SIGQUIT `cat #{pid_file}`"
     # if fetch(:sneakers_run_config) == true
     #   execute :kill, "-SIGKILL `cat #{pid_file}`"
     # else
