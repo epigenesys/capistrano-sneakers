@@ -62,12 +62,11 @@ namespace :sneakers do
   end
 
   def stop_sneakers(pid_file)
-    execute :kill, "-SIGQUIT `cat #{pid_file}`"
-    # if fetch(:sneakers_run_config) == true
-    #   execute :kill, "-SIGKILL `cat #{pid_file}`"
-    # else
-    #   execute :kill, "-TERM `cat #{pid_file}`"
-    # end
+    if fetch(:sneakers_run_config) == true
+      execute :kill, "-SIGTERM `cat #{pid_file}`"
+    else
+      execute :kill, "-TERM `cat #{pid_file}`"
+    end
   end
 
   def start_sneakers(pid_file, idx = 0)
@@ -126,9 +125,9 @@ namespace :sneakers do
 
   task :add_default_hooks do
     after 'deploy:starting', 'sneakers:quiet'
-    after 'deploy:updated', 'sneakers:stop'
-    after 'deploy:reverted', 'sneakers:stop'
-    after 'deploy:published', 'sneakers:start'
+    # after 'deploy:updated', 'sneakers:stop'
+    # after 'deploy:reverted', 'sneakers:stop'
+    after 'deploy:published', 'sneakers:rolling_restart'
   end
 
   desc 'Quiet sneakers (stop processing new tasks)'
